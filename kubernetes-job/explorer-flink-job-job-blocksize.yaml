@@ -20,7 +20,7 @@ spec:
             command:
             - sh
             - -c
-            - "/usr/local/lib/python3.7/dist-packages/pyflink/bin/flink run -m flink-jobmanager:8081  -j flink-1.0-SNAPSHOT.jar -pyfs flinkjob.zip -pym main --name=XXXX --config=XXXXX"
+            - "/usr/local/lib/python3.7/dist-packages/pyflink/bin/flink run -m flink-jobmanager:8081  -j flink-1.0-SNAPSHOT.jar -pyfs flinkjob.zip -pym main --name=XXXX --config=configs/configs.yaml"
           restartPolicy: Never
           imagePullSecrets:
           - name: registry-XXXXX
