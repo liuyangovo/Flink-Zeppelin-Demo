@@ -1,0 +1,26 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  labels:
+    app: flink-job
+  name: flink-job
+spec:
+  schedule: "*/5 * * * *"
+  failedJobsHistoryLimit: 1
+  successfulJobsHistoryLimit: 1
+  jobTemplate:
+    spec:
+      completions: 1
+      parallelism: 1
+      template:
+        spec:
+          containers:
+          - image: flink-job-kso2naien    #替换镜像
+            name: flink-job
+            command:
+            - sh
+            - -c
+            - "/usr/local/lib/python3.7/dist-packages/pyflink/bin/flink run -m flink-jobmanager:8081  -j flink-1.0-SNAPSHOT.jar -pyfs flinkjob.zip -pym main --name=XXXX --config=XXXXX"
+          restartPolicy: Never
+          imagePullSecrets:
+          - name: registry-XXXXX
