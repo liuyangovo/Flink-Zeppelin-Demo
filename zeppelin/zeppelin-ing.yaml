@@ -1,0 +1,24 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: zeppelin-ingress
+  labels:
+    app: zeppelin-ingress
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      proxy_set_header Upgrade "websocket";
+      proxy_set_header Connection "Upgrade";
+spec:
+  rules:
+    - host: zeppelin.XXX
+      http:
+        paths:
+          - path: /
+            backend:
+              serviceName: "zeppelin"
+              servicePort: 8080
+  tls:
+    - hosts:
+        - zeppelin.XXX
+      secretName: tls-XXXX

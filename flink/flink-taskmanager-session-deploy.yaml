@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flink-taskmanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flink
+      component: taskmanager
+  template:
+    metadata:
+      labels:
+        app: flink
+        component: taskmanager
+    spec:
+      containers:
+      - name: taskmanager
+        image: flink-ak39n39zn   #需更换新build的镜像
+        args: ["taskmanager"]
+        ports:
+        - containerPort: 6122
+          name: rpc
+        - containerPort: 6125
+          name: query-state
+        livenessProbe:
+          tcpSocket:
+            port: 6122
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        resources:               
+          requests:   
+            cpu: "500m" 
+            memory: "2000Mi"
+        volumeMounts:
+        - name: flink-config
+          mountPath: /opt/flink/conf/flink-conf.yaml
+          subPath: flink-conf.yaml
+        - mountPath: /opt/flink/lib
+          name: data
+      securityContext:
+        runAsUser: 9999
+      imagePullSecrets:
+      - name: registry-XXX
+      volumes:
+      - name: flink-config
+        configMap:
+          name: flink-config
+      - name: data
+        persistentVolumeClaim:
+          claimName: flink-lib-pvc

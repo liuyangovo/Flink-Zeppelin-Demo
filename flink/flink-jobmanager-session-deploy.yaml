@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: flink-jobmanager
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: flink
+      component: jobmanager
+  template:
+    metadata:
+      labels:
+        app: flink
+        component: jobmanager
+    spec:
+      containers:
+      - name: jobmanager
+        image: flink-ak39n39zn #需更换新build的镜像
+        args: ["jobmanager"]
+        ports:
+        - containerPort: 6123
+          name: rpc
+        - containerPort: 6124
+          name: blob-server
+        - containerPort: 8081
+          name: webui
+        resources:               
+          requests:   
+            cpu: "200m" 
+            memory: "800Mi"
+        livenessProbe:
+          tcpSocket:
+            port: 6123
+          initialDelaySeconds: 30
+          periodSeconds: 60
+        volumeMounts:
+        - name: flink-config-volume
+          mountPath: /opt/flink/conf/flink-conf.yaml
+          subPath: flink-conf.yaml
+        - mountPath: /opt/flink/lib
+          name: data
+      securityContext:
+        runAsUser: 9999
+      imagePullSecrets:
+      - name: registry-XXX
+      volumes:
+      - name: flink-config-volume
+        configMap:
+          name: flink-config
+      - name: data
+        persistentVolumeClaim:
+          claimName: flink-lib-pvc

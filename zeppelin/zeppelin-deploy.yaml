@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: zeppelin
+    tier: backend
+  name: zeppelin
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: zeppelin
+      tier: backend
+  template:
+    metadata:
+      labels:
+        app: zeppelin
+        tier: backend
+    spec:
+      containers:
+      - image: zeppelin-ak39n39zn     #build新的镜像替换
+        imagePullPolicy: Always
+        name: zeppelin
+        lifecycle:
+          preStop:
+            exec:
+              # SIGTERM triggers a quick exit; gracefully terminate instead
+              command:
+                [
+                  "sh",
+                  "-c",
+                  "ps -ef | grep org.apache.zeppelin.server.ZeppelinServer | grep -v grep | awk '{print $2}' | xargs kill",
+                ]
+        ports:
+          - containerPort: 8080
+            name: zeppelin
+            protocol: TCP
+        resources:
+          requests:
+            cpu: 500m
+            memory: 2000Mi
+        volumeMounts:
+          - mountPath: /zeppelin/notebook/
+            name: data
+      imagePullSecrets:
+      - name: registry-XXX
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: zeppelin-pvc
